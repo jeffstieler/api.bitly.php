@@ -1,8 +1,8 @@
 <?php
 
 /**
-* A simple wrapper class for Bit.ly's API that makes
-* use of cURL (make sure you have cURL enabled in your PHP installation)
+* A simple wrapper class for Bit.ly's API meant for use
+* in WordPress plugins
 *
 * Instantiate a new Bitly object:
 * $bitly = new Bitly(loginname, apikey, [version]);
@@ -25,6 +25,7 @@
 * http://code.google.com/p/bitly-api/wiki/ApiDocumentation
 *
 * @author Andy Goh
+* @author Jeff Stieler
 */
 class Bitly
 {
@@ -72,6 +73,7 @@ class Bitly
 		{
 			return $response['results'][$longurl]['shortUrl'];
 		}
+		return $response;
 	}
 	
 	/**
@@ -101,6 +103,7 @@ class Bitly
 		{
 			return $response['results'][$in]['longUrl'];
 		}
+		return $response;
 	}
 	
 	/**
@@ -151,6 +154,7 @@ class Bitly
 		{
 			return $response['results'];
 		}
+		return $response;
 	}
 
 	/**
@@ -188,6 +192,7 @@ class Bitly
 		{
 			return $response['results'];
 		}
+		return $response;
 	}
 	
 	/**
@@ -205,10 +210,11 @@ class Bitly
 		{
 			return $response['results'];
 		}
+		return $response;
 	}
 	
 	/**
-	* Single function to deal with sending cURL requests
+	* Single function to deal with sending wp_remote_get requests
 	* to the URL specified
 	*
 	* @param string $url the url to send the curl requests
@@ -216,24 +222,17 @@ class Bitly
 	**/
 	private function request($url)
 	{
-		$curl_handler = curl_init();
-		
 		$url = $url . "&login=" . $this->login . "&apiKey=" . $this->apikey;
-		
-		curl_setopt($curl_handler, CURLOPT_URL, $url);
-		curl_setopt($curl_handler, CURLOPT_RETURNTRANSFER, 1);
-		
-		$response = curl_exec($curl_handler);
-		
-		curl_close($curl_handler);
-		
-		if ($response !== false)
+
+		$response = wp_remote_get($url);
+
+		if ($response instanceof WP_Error)
 		{
-			return $response;
+			return false;
 		}
 		else
 		{
-			return false;
+			return $response['body'];
 		}
 	}
 	
